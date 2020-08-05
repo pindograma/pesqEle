@@ -37,6 +37,20 @@ pesq_tidy <- function(pesq_main, pesq_details) {
     purrr::set_names(c('arq', 'id', 'empresa', 
                        'stat_id', 'stat_nm',
                        'dt_reg', 'abrangencia', 'acoes')) %>%
+    dplyr::mutate(year = stringr::word(id, 2, sep = '/')) %>%
+    dplyr::mutate(muni = ifelse(
+      year == 2020,
+      stringr::str_squish(stringr::word(abrangencia, 2, sep = '/')),
+      NA
+    )) %>%
+    dplyr::mutate(uf = stringr::word(id, 1, sep = '-')) %>%
+    dplyr::mutate(muni_stripped = dplyr::recode(
+      remove_accents(muni),
+      `DIAS DAVILA` = "DIAS D'AVILA",
+      `OLHO DAGUA DAS CUNHAS` = "OLHO D'AGUA DAS CUNHAS",
+      `PAU DARCO` = "PAU D'ARCO"
+    )) %>%
+    dplyr::left_join(tse_city_codes, by = c('uf' = 'uf', 'muni_stripped' = 'muni')) %>%
     dplyr::select(-acoes)
   
   pesq_details_tidy <- pesq_details %>%
@@ -63,7 +77,6 @@ pesq_tidy <- function(pesq_main, pesq_details) {
                        "estatistico_registro",
                        "verificacao",
                        "valor")) %>%
-    # dplyr::filter(eleicao == "Elei\u00e7\u00f5es Gerais 2018") %>%
     dplyr::mutate_at(dplyr::vars(dplyr::starts_with("dt_")),
                      dplyr::funs(as.Date(., format = "%d/%m/%Y"))) %>%
     dplyr::mutate(n_entrevistados = as.numeric(n_entrevistados),
@@ -80,28 +93,26 @@ pesq_tidy <- function(pesq_main, pesq_details) {
     dplyr::mutate(arq_id = stringr::str_extract(arq, "([0-9A-Z_)]+)(?=_)")) %>%
     dplyr::mutate(criterio_origem = origem == "Recursos proprios" &
              contratante_propria_empresa == "Sim") %>%
-    # tudo o que nao bateu \\u00e9 lixo - dado duplicado
     dplyr::inner_join(dplyr::select(pesq_main_tidy, -arq), c("id")) %>%
     dplyr::group_by(estatistico_registro) %>%
     dplyr::mutate(empresas_por_estatistico = dplyr::n_distinct(empresa), n = dplyr::n()) %>%
     dplyr::ungroup() %>%
     dplyr::mutate(cnpj = stringr::str_extract(empresa_contratada, re_cnpj),
            emp_nm = clean_emp(empresa_contratada)) %>%
-    # pq isso aqui estava sendo feito?
     dplyr::group_by_at(dplyr::vars(-arq, -arq_id, -id)) %>%
     dplyr::slice(1) %>%
     dplyr::ungroup()
   
-  pesqEle2018 <- pesq_details_tidy %>%
+  pesqEle_final <- pesq_details_tidy %>%
     tibble::rowid_to_column("id_seq") %>%
     dplyr::select(
       # informa\\u00e7\\u00f5es de identifica\\u00e7\\u00e3o
       id_seq,
       id_pesq = id,
-      # id_muni = arq_id,
+      id_muni = codigo_tse,
       # informa\\u00e7\\u00f5es b\\u00e1sicas
-      # info_uf = uf,
-      # info_muni = muni,
+      info_uf = uf,
+      info_muni = muni,
       info_election = eleicao,
       info_position = cargo,
       # informa\\u00e7\\u00f5es da empresa
@@ -128,9 +139,6 @@ pesq_tidy <- function(pesq_main, pesq_details) {
       txt_about = sobre_municipio,
       txt_plan = plano_amostral
     ) %>%
-    # dplyr::filter(info_election == "Elei\u00e7\u00f5es Gerais 2018") %>%
-    tidyr::separate(id_pesq, c("info_uf", "temp"), "-", remove = FALSE) %>%
-    dplyr::select(-temp) %>%
     dplyr::mutate(stat_unique = id_fonema(stat_id, stat_nm)) %>% 
     dplyr::group_by(stat_unique) %>% 
     dplyr::mutate(stat_nm = clean_stat_nm(dplyr::first(stat_nm))) %>% 
@@ -138,5 +146,6 @@ pesq_tidy <- function(pesq_main, pesq_details) {
     dplyr::ungroup() %>% 
     dplyr::mutate(stat_nm = dplyr::if_else(
       stat_nm == "7655", "AUGUSTO SILVA ROCHA", stat_nm))
-  pesqEle2018
+  
+  pesqEle_final
 }
