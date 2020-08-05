@@ -192,7 +192,12 @@ pesq_download_2020_uf <- function(sigla, path) {
   message("Downloading ", sigla, "...")
   # pega resultados por UF
   # quebra pesquisas para nao dar mais de 100 results
-  datas <- list(c("01/01/2020", "19/06/2020"))
+  datas <- list(c("01/01/2020", "19/06/2020"),
+                c("20/06/2020", "30/06/2020"),
+                c("01/07/2020", "08/07/2020"),
+                c("09/07/2020", "15/07/2020"),
+                c("16/07/2020", "22/07/2020"),
+                c("23/07/2020", "31/07/2020"))
   u <- u_tse()
   r0 <- httr::GET(u)
   d_results <- purrr::imap_dfr(datas, ~{
