@@ -2,4 +2,5 @@
 
 export("%>%")
 export(pe_2018)
+export(pe_2020)
 importFrom(magrittr,"%>%")

@@ -4,7 +4,8 @@
 \name{pesqEle_2018}
 \alias{pesqEle_2018}
 \title{pesqEle 2018 tidy dataset}
-\format{A data frame
+\format{
+A data frame
 \describe{
    \item{id_seq}{Sequential identification number}
    \item{id_pesq}{Poll id}
@@ -31,7 +32,8 @@
    \item{txt_method}{Full methodology (text)}
    \item{txt_about}{About the poll (text)}
    \item{txt_plan}{Sampling plan (text)}
-}}
+}
+}
 \source{
 \url{http://inter01.tse.jus.br/pesqele-publico/app/pesquisa/listarEstatisticos.xhtml}
 }
