@@ -7,6 +7,9 @@
 #' @param path directory path to save files. Defaults to 
 #'   \code{data-raw/html_2018}.
 #' 
+#' @param remove Determines whether the function should remove the old files
+#'   before proceeding. Defaults to TRUE.
+#' 
 #' This function downloads all polls for 2018 elections. It does not delete 
 #' existing polls, then it might run faster for the next times. It does
 #' subscribe the \code{pesq_main} files, whose contain the list of individual
@@ -19,14 +22,16 @@
 #'   \code{\link{pesqEle_2018}} database.
 #' 
 #' @export
-pe_2018 <- function(path = "data-raw/html_2018") {
-  message("Deleting old files...")
-  file.remove(dir(path, pattern = "_main_", full.names = TRUE))
-  # download 2018 --------------------------------------------------------------
+pe_2018 <- function(path = "data-raw/html_2018", remove = T) {
+  if (remove) {
+    message("Deleting old files...")
+    file.remove(dir(path, pattern = "_main_", full.names = TRUE))
+  }
+  
   message("Downloading documents.")
   message("This should take about 15 minutes...")
   pesq_download_2018(path)
-  # read and tidy --------------------------------------------------------------
+  
   message("Parsing files...")
   pesq_main <- pesq_parse_main(dir(path, pattern = "_main_", full.names = TRUE))
   pesq_details <- pesq_parse_details(dir(path, pattern = "_details_", full.names = TRUE))
@@ -43,6 +48,9 @@ pe_2018 <- function(path = "data-raw/html_2018") {
 #' 
 #' @param path directory path to save files. Defaults to 
 #'   \code{data-raw/html_2018}.
+#'   
+#' @param remove Determines whether the function should remove the old files
+#'   before proceeding. Defaults to TRUE.
 #' 
 #' This function downloads all polls for 2018 elections. It does not delete 
 #' existing polls, then it might run faster for the next times. It does
@@ -56,14 +64,16 @@ pe_2018 <- function(path = "data-raw/html_2018") {
 #'   \code{\link{pesqEle_2018}} database.
 #' 
 #' @export
-pe_2020 <- function(path = "data-raw/html_2020") {
-  message("Deleting old files...")
-  file.remove(dir(path, pattern = "_main_", full.names = TRUE))
-  # download 2018 --------------------------------------------------------------
+pe_2020 <- function(path = "data-raw/html_2020", remove = T) {
+  if (remove) {
+    message("Deleting old files...")
+    file.remove(dir(path, pattern = "_main_", full.names = TRUE))
+  }
+  
   message("Downloading documents.")
   message("This should take about 15 minutes...")
   pesq_download_2020(path)
-  # read and tidy --------------------------------------------------------------
+  
   message("Parsing files...")
   pesq_main <- pesq_parse_main(dir(path, pattern = "_main_", full.names = TRUE))
   pesq_details <- pesq_parse_details(dir(path, pattern = "_details_", full.names = TRUE))
